@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verificación de Token</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="card shadow-lg">
+          <div class="card-header text-center bg-primary text-white">
+            <h3>Verificación de Token</h3>
+          </div>
+          <div class="card-body">
+            <form id="tokenForm">
+              <div class="form-group">
+                <label for="email">Correo:</label>
+                <input type="email" class="form-control" id="email" name="email" required readonly>
+              </div>
+              <div class="form-group">
+                <label for="token_code">Token de Acceso:</label>
+                <input type="text" class="form-control" id="token_code" name="token_code" required>
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">Verificar Token</button>
+            </form>
+            <p class="text-center mt-3" id="message"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const email = localStorage.getItem("email");
+      if (email) {
+        document.getElementById("email").value = email;
+      } else {
+        document.getElementById("message").innerText = "No se encontró el correo. Por favor, vuelve a iniciar sesión.";
+      }
+    });
+
+    document.getElementById("tokenForm").addEventListener("submit", async function(event) {
+      event.preventDefault();
+      const email = document.getElementById("email").value;
+      const token_code = document.getElementById("token_code").value;
+
+      try {
+        const response = await fetch("/verify-login-token", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ email, token_code })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          localStorage.setItem("token", data.token); // Guarda el token JWT en el almacenamiento local
+          localStorage.removeItem("email"); // Elimina el correo temporal del almacenamiento local
+          window.location.href = "/home.html"; // Redirige a la página de inicio
+        } else {
+          document.getElementById("message").innerText = "Error: " + data.message;
+        }
+      } catch (error) {
+        document.getElementById("message").innerText = "Error de conexión";
+      }
+    });
+  </script>
+</body>
+</html>

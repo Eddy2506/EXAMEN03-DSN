@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Página de Inicio</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="card shadow-lg">
+          <div class="card-header text-center bg-primary text-white">
+            <h3>Bienvenido a la Página de Inicio</h3>
+          </div>
+          <div class="card-body text-center">
+            <p id="welcomeMessage" class="lead">Cargando...</p>
+          </div>
+          <div class="card-footer text-center">
+            <button class="btn btn-secondary" onclick="logout()">Cerrar Sesión</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function loadHome() {
+      const token = localStorage.getItem("token");  // Obtiene el token del almacenamiento local
+      if (!token) {
+        window.location.href = "/login.html";       // Redirige al login si no hay token
+        return;
+      }
+
+      try {
+        const response = await fetch("/protected", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}` // Incluye el token en el encabezado
+          }
+        });
+
+        if (response.ok) {
+          document.getElementById("welcomeMessage").innerText = "Bienvenido a la página de inicio.";
+        } else {
+          localStorage.removeItem("token");        // Elimina el token si es inválido
+          window.location.href = "/login.html";     // Redirige al login si hay error
+        }
+      } catch (error) {
+        document.getElementById("welcomeMessage").innerText = "Error de conexión";
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem("token");  // Elimina el token
+      window.location.href = "/login.html";  // Redirige al login
+    }
+
+    loadHome();
+  </script>
+</body>
+</html>
